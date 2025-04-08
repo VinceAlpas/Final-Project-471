@@ -7,26 +7,22 @@ public class EnemyAI : MonoBehaviour
     {
         Pace,
         Follow,
-        Attack  // New state for when the enemy attacks
+        Attack
     }
 
-    [SerializeField]
-    GameObject[] route;
+    [SerializeField] GameObject[] route;
     public GameObject target;
     int routeIndex = 0;
 
-    [SerializeField]
-    float speed = 3.0f;
+    [SerializeField] float speed = 3.0f;
     public int enemyHealth = 100;
     public GameObject deathParticlesPrefab;
     public GameObject itemDropPrefab;
 
     public State currentState = State.Pace;
-    private float attackRange = 2.0f;  // Distance at which the enemy will attack the player
-    private float attackCooldown = 2.0f;  // Time between attacks
+    private float attackRange = 2.0f;
+    private float attackCooldown = 2.0f;
     private float lastAttackTime = 0f;
-
-    void Start() {}
 
     void Update()
     {
@@ -51,13 +47,14 @@ public class EnemyAI : MonoBehaviour
 
     void OnPace()
     {
+        if (route == null || route.Length == 0) return;
+
         target = route[routeIndex];
         MoveTo(target);
 
         if (Vector3.Distance(transform.position, target.transform.position) < 0.1f)
         {
-            routeIndex += 1;
-            if (routeIndex >= route.Length) routeIndex = 0;
+            routeIndex = (routeIndex + 1) % route.Length;
         }
 
         GameObject obstacle = CheckForward();
@@ -75,14 +72,13 @@ public class EnemyAI : MonoBehaviour
         PlayerStateManager playerState = target.GetComponent<PlayerStateManager>();
         if (playerState != null && playerState.isSneaking)
         {
-            currentState = State.Pace; // Switch back to pacing if sneaking
+            currentState = State.Pace;
             return;
         }
 
         MoveTo(target);
 
         float distanceToTarget = Vector3.Distance(transform.position, target.transform.position);
-
         if (distanceToTarget < attackRange)
         {
             StartCoroutine(StartAttack());
@@ -98,7 +94,7 @@ public class EnemyAI : MonoBehaviour
 
     IEnumerator StartAttack()
     {
-        yield return new WaitForSeconds(0.2f);  // Small delay to avoid flickering
+        yield return new WaitForSeconds(0.2f);
         currentState = State.Attack;
     }
 
@@ -156,38 +152,38 @@ public class EnemyAI : MonoBehaviour
     }
 
     void Die()
-{
-    Debug.Log("Enemy died!");
-
-    if (deathParticlesPrefab != null)
     {
-        Instantiate(deathParticlesPrefab, transform.position, Quaternion.identity);
-    }
+        Debug.Log("EnemyAI.Die() called");
 
-    // Drop item if assigned
-    if (itemDropPrefab != null)
-    {
-        Instantiate(itemDropPrefab, transform.position, Quaternion.identity);
-    }
+        if (deathParticlesPrefab != null)
+        {
+            Instantiate(deathParticlesPrefab, transform.position, Quaternion.identity);
+        }
 
-    currentState = State.Pace;
-    enabled = false;
-    transform.rotation = Quaternion.Euler(90, 0, 0);
-    Vector3 position = transform.position;
-    position.y = 0;
-    transform.position = position;
+        if (itemDropPrefab != null)
+        {
+            Debug.Log("Spawning item drop...");
+           Instantiate(itemDropPrefab, transform.position + Vector3.up * 0.3f, Quaternion.identity);
+        }
+        else
+        {
+            Debug.LogWarning("itemDropPrefab not assigned");
+        }
 
-    Collider enemyCollider = GetComponent<Collider>();
-    if (enemyCollider != null)
-    {
-        enemyCollider.enabled = false;
+        GameManager gm = FindObjectOfType<GameManager>();
+        if (gm != null)
+        {
+            gm.EnemyDefeated();
+        }
+
+        Destroy(gameObject);
     }
-}
 
     void MoveTo(GameObject t)
     {
         transform.position = Vector3.MoveTowards(transform.position, t.transform.position, speed * Time.deltaTime);
         Vector3 directionToTarget = t.transform.position - transform.position;
+
         if (directionToTarget.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(directionToTarget);
