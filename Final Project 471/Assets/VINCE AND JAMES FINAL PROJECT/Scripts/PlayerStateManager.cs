@@ -272,17 +272,27 @@ public class PlayerStateManager : MonoBehaviour
         Destroy(newBullet, 5f);
     }
 
-    private void HandleMouseLook()
-    {
-        float mouseX = lookInput.x * mouseSensitivity * Time.deltaTime;
-        float mouseY = lookInput.y * mouseSensitivity * Time.deltaTime;
 
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+private void HandleMouseLook()
+{
+    // Apply sensitivity and deltaTime to mouse movement
+    float mouseX = lookInput.x * mouseSensitivity * Time.deltaTime;
+    float mouseY = lookInput.y * mouseSensitivity * Time.deltaTime;
 
-        playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        transform.Rotate(Vector3.up * mouseX);
-    }
+    // Subtract mouseY to invert the Y axis (typical FPS controls)
+    xRotation -= mouseY;
+
+    // Clamp vertical look between -60 (down) and 20 (up) degrees
+    xRotation = Mathf.Clamp(xRotation, -60f, 20f);
+
+    // Apply vertical rotation to the camera only
+    playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+    // Apply horizontal rotation to the player body
+    transform.Rotate(Vector3.up * mouseX);
+}
+
+
 
     public void JumpPlayer()
     {

@@ -19,6 +19,7 @@ public class EnemyAI : MonoBehaviour
     float speed = 3.0f;
     public int enemyHealth = 100;
     public GameObject deathParticlesPrefab;
+    public GameObject itemDropPrefab;
 
     public State currentState = State.Pace;
     private float attackRange = 2.0f;  // Distance at which the enemy will attack the player
@@ -155,26 +156,33 @@ public class EnemyAI : MonoBehaviour
     }
 
     void Die()
-    {
-        Debug.Log("💀 Enemy died!");
-        if (deathParticlesPrefab != null)
-        {
-            Instantiate(deathParticlesPrefab, transform.position, Quaternion.identity);
-        }
-        
-        currentState = State.Pace;
-        enabled = false;
-        transform.rotation = Quaternion.Euler(90, 0, 0);
-        Vector3 position = transform.position;
-        position.y = 0;
-        transform.position = position;
+{
+    Debug.Log("Enemy died!");
 
-        Collider enemyCollider = GetComponent<Collider>();
-        if (enemyCollider != null)
-        {
-            enemyCollider.enabled = false;
-        }
+    if (deathParticlesPrefab != null)
+    {
+        Instantiate(deathParticlesPrefab, transform.position, Quaternion.identity);
     }
+
+    // Drop item if assigned
+    if (itemDropPrefab != null)
+    {
+        Instantiate(itemDropPrefab, transform.position, Quaternion.identity);
+    }
+
+    currentState = State.Pace;
+    enabled = false;
+    transform.rotation = Quaternion.Euler(90, 0, 0);
+    Vector3 position = transform.position;
+    position.y = 0;
+    transform.position = position;
+
+    Collider enemyCollider = GetComponent<Collider>();
+    if (enemyCollider != null)
+    {
+        enemyCollider.enabled = false;
+    }
+}
 
     void MoveTo(GameObject t)
     {
