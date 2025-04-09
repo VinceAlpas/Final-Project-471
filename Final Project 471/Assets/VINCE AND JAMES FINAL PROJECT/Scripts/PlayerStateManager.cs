@@ -14,47 +14,42 @@ public class PlayerStateManager : MonoBehaviour
     [HideInInspector] public PlayerDoubleJumpState doubleJumpState = new PlayerDoubleJumpState();
 
     [HideInInspector] public Vector2 movement;
-     public Vector2 lookInput;
-     public Transform playerCamera;
-     public float mouseSensitivity = 30f;
-     public float xRotation = 0f;
-     
-     public float default_speed = 2f;
-     public float sprint_speed = 3f;
-     public float sneak_speed = 0.5f;
-     public float jumpForce = 0.3f;
-     public bool isSneaking = false;
-     public bool isSprinting = false;
-     public bool IsJumping = false;
-     public bool isAttacking = false;
-     public CharacterController controller;
-     public Vector3 velocity;
-     public float gravity = -20f;
-     public float verticalVelocity;
-     public bool isGrounded;
-     
-     private bool hasDoubleJumped = false;
-     private float lastJumpTime = -100f;
+    public Vector2 lookInput;
 
-     public float doubleJumpWindow = 0.3f;
+    public Transform playerCamera;
+    public float mouseSensitivity = 100f;
+    public float xRotation = 0f;
 
-    // Sword & Animator References
+    public float default_speed = 2f;
+    public float sprint_speed = 3f;
+    public float sneak_speed = 0.5f;
+    public float jumpForce = 0.3f;
+    public bool isSneaking = false;
+    public bool isSprinting = false;
+    public bool IsJumping = false;
+    public bool isAttacking = false;
+    public CharacterController controller;
+    public Vector3 velocity;
+    public float gravity = -20f;
+    public float verticalVelocity;
+    public bool isGrounded;
+
+    private bool hasDoubleJumped = false;
+    private float lastJumpTime = -100f;
+    public float doubleJumpWindow = 0.3f;
+
     public GameObject sword;
     public Animator animator;
 
-    // Bullet & Bullet Spawner References
     public Transform bulletSpawner;
     public GameObject bulletPrefab;
     private bool isFiring = false;
     private float fireRate = 0.1f;
     private float lastFireTime = 0f;
 
-    // Fall damage
     public float fallThreshold = -10f;
-    // Player Health
     public int playerHealth = 100;
 
-    // To track the previous state
     private PlayerBaseState previousState;
 
     void Start()
@@ -62,29 +57,18 @@ public class PlayerStateManager : MonoBehaviour
         controller = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        animator = GetComponent<Animator>(); // Ensure Animator is assigned
+
+        animator = GetComponent<Animator>();
         SwitchState(idleState);
     }
 
     void Update()
     {
+        Debug.Log("📍 Movement Input: " + movement);
+
         isGrounded = controller.isGrounded;
         if (isGrounded && velocity.y < 0)
-        {
-            velocity.y = -2f; // Keeps character grounded
-
-            if(movement.magnitude > 0.1f)
-            {
-                if (isSprinting)
-                    SwitchState(sprintState);
-                else
-                    SwitchState(walkState);
-            }
-            else
-            {
-            SwitchState(idleState);
-            }
-        }
+            velocity.y = -2f;
 
         currentState.UpdateState(this);
         velocity.y += gravity * Time.deltaTime;
@@ -94,32 +78,24 @@ public class PlayerStateManager : MonoBehaviour
         HandleShooting();
 
         if (transform.position.y < fallThreshold)
-        {
             Die();
-        }
     }
 
-    // Handle Movement Input
     void OnMove(InputValue moveVal)
     {
         movement = moveVal.Get<Vector2>();
+        Debug.Log("🎮 MOVE input: " + movement);
 
-        if (isAttacking) return; // Prevent movement while attacking
+        if (isAttacking) return;
 
         if (movement.magnitude > 0.1f)
         {
             if (isSprinting)
-            {
                 SwitchState(sprintState);
-            }
             else if (isSneaking)
-            {
                 SwitchState(sneakState);
-            }
             else
-            {
                 SwitchState(walkState);
-            }
         }
         else
         {
@@ -132,74 +108,65 @@ public class PlayerStateManager : MonoBehaviour
         lookInput = lookVal.Get<Vector2>();
     }
 
-    // Handle Sneak Input (C key)
+    void HandleMouseLook()
+    {
+        float mouseX = lookInput.x * mouseSensitivity * Time.deltaTime;
+        float mouseY = lookInput.y * mouseSensitivity * Time.deltaTime;
+
+        xRotation -= mouseY;
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+        if (playerCamera != null)
+            playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+        transform.Rotate(Vector3.up * mouseX);
+    }
+
     void OnSneak(InputValue sneakVal)
     {
         isSneaking = sneakVal.isPressed;
 
         if (isSneaking && !isSprinting)
-        {
-            Debug.Log("Sneaking Activated");
             SwitchState(sneakState);
-        }
         else if (!isSneaking && !isSprinting)
-        {
-            Debug.Log("Sneaking Deactivated");
             SwitchState(walkState);
-        }
     }
 
-    // Handle Sprint Input (Left Shift)
     void OnSprint(InputValue sprintVal)
     {
         isSprinting = sprintVal.isPressed;
+
         if (isSprinting && !isSneaking)
-        {
             SwitchState(sprintState);
-        }
-        else if (isSprinting && !isSneaking)
-        {
+        else if (!isSprinting && !isSneaking)
             SwitchState(walkState);
-        }
     }
 
-    // Handle Jump Input (Spacebar)
     void OnJump()
     {
         if (isGrounded)
         {
-            // normal jump
             JumpPlayer();
             lastJumpTime = Time.time;
             hasDoubleJumped = false;
         }
-        else
+        else if (Time.time - lastJumpTime <= doubleJumpWindow && !hasDoubleJumped)
         {
-            // double jump
-            if (Time.time - lastJumpTime <= doubleJumpWindow && !hasDoubleJumped)
-            {
-                SwitchState(doubleJumpState);
-                doubleJumpState.RecordJumpTime();
-            }
+            SwitchState(doubleJumpState);
+            doubleJumpState.RecordJumpTime();
         }
     }
 
-    // Handle Attack Input (Left Click)
     void OnAttack()
     {
-        if (!isAttacking) // Prevent spam attacks
+        if (!isAttacking)
         {
             Debug.Log("Sword Attack!");
             isAttacking = true;
 
-            // **Play Attack Animation**
             animator.SetTrigger("Attack");
-
-            // **Switch to Attack State**
             SwitchState(attackState);
 
-            // **Return to Previous State After Attack Finishes**
-            Invoke("EndAttack", 0.5f); // Adjust time based on animation length
+            Invoke("EndAttack", 0.5f);
         }
     }
 
@@ -207,16 +174,11 @@ public class PlayerStateManager : MonoBehaviour
     {
         isAttacking = false;
         if (movement.magnitude > 0.1f)
-        {
             SwitchState(walkState);
-        }
         else
-        {
             SwitchState(idleState);
-        }
     }
 
-    // Helper Function to Move the Player
     public void MovePlayer(float speed)
     {
         Vector3 forward = playerCamera.forward;
@@ -228,16 +190,12 @@ public class PlayerStateManager : MonoBehaviour
         forward.Normalize();
         right.Normalize();
 
-        if (isAttacking) return; // Prevent movement during attack
+        Vector3 move = forward * movement.y + right * movement.x;
 
-        Vector3 move = new Vector3(movement.x, 0, movement.y);
-        move = transform.right * move.x + transform.forward * move.z; // Ensure movement is relative to camera
-
-        Vector3 moveDirection = forward * movement.y + right * movement.x;
-        controller.Move(move * Time.deltaTime * speed);
+        if (controller != null)
+            controller.Move(move * speed * Time.deltaTime);
     }
 
-    // Switching Between States
     public void SwitchState(PlayerBaseState newState)
     {
         currentState?.ExitState(this);
@@ -258,41 +216,19 @@ public class PlayerStateManager : MonoBehaviour
     {
         if (bulletPrefab == null || bulletSpawner == null)
         {
-            Debug.LogError("❌ Bullet Prefab or Spawner is missing.");
+            Debug.LogError("Bullet Prefab or Spawner is missing.");
             return;
         }
 
-        GameObject newBullet = Instantiate(bulletPrefab, bulletSpawner.transform.position, bulletSpawner.transform.rotation);
+        GameObject newBullet = Instantiate(bulletPrefab, bulletSpawner.position, bulletSpawner.rotation);
         Rigidbody rb = newBullet.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.linearVelocity = bulletSpawner.transform.forward * 20f;
+            rb.linearVelocity = bulletSpawner.forward * 20f;
         }
 
         Destroy(newBullet, 5f);
     }
-
-
-private void HandleMouseLook()
-{
-    // Apply sensitivity and deltaTime to mouse movement
-    float mouseX = lookInput.x * mouseSensitivity * Time.deltaTime;
-    float mouseY = lookInput.y * mouseSensitivity * Time.deltaTime;
-
-    // Subtract mouseY to invert the Y axis (typical FPS controls)
-    xRotation -= mouseY;
-
-    // Clamp vertical look between -60 (down) and 20 (up) degrees
-    xRotation = Mathf.Clamp(xRotation, -60f, 20f);
-
-    // Apply vertical rotation to the camera only
-    playerCamera.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-
-    // Apply horizontal rotation to the player body
-    transform.Rotate(Vector3.up * mouseX);
-}
-
-
 
     public void JumpPlayer()
     {
