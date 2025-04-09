@@ -7,7 +7,7 @@ public class SwordAttack : MonoBehaviour
 
     void Start()
     {
-        gameManager = FindObjectOfType<GameManager>(); // Get reference to GameManager
+        gameManager = FindObjectOfType<GameManager>();
     }
 
     void OnTriggerEnter(Collider other)
@@ -21,12 +21,14 @@ public class SwordAttack : MonoBehaviour
                 Instantiate(bloodEffectPrefab, other.transform.position, Quaternion.identity);
             }
 
-            Destroy(other.gameObject);
-
-            if (gameManager != null)
+            EnemyAI enemy = other.GetComponent<EnemyAI>();
+            if (enemy != null)
             {
-                gameManager.EnemyDefeated(); // Notify GameManager that an enemy is eliminated
+                enemy.TakeDamage(999); // Or however much you want to deal
             }
+
+            // GameManager call should now happen from within EnemyAI.Die()
+            // So no need to call it here directly
         }
     }
 }
