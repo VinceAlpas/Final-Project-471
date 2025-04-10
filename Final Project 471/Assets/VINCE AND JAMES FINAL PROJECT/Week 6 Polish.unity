@@ -11406,7 +11406,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6413530598249970129, guid: a7ace2f619f53884b882d6fe15a14e07, type: 3}
       propertyPath: m_NeverAutoSwitchControlSchemes
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6413530598249970129, guid: a7ace2f619f53884b882d6fe15a14e07, type: 3}
       propertyPath: m_ActionEvents.Array.data[0].m_ActionId
@@ -11840,7 +11840,7 @@ PrefabInstance:
       objectReference: {fileID: 4928672618860623264}
     - target: {fileID: 1396198023235176296, guid: e0e9edbc724c585499c271e5a4cce6e6, type: 3}
       propertyPath: m_NeverAutoSwitchControlSchemes
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2624094974166851758, guid: e0e9edbc724c585499c271e5a4cce6e6, type: 3}
       propertyPath: m_LocalPosition.x
