@@ -64,7 +64,6 @@ public class PlayerStateManager : MonoBehaviour
 
     void Update()
     {
-        Debug.Log("📍 Movement Input: " + movement);
 
         isGrounded = controller.isGrounded;
         if (isGrounded && velocity.y < 0)
