@@ -1,11 +1,14 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using TMPro;
 
 public class PrepStation : MonoBehaviour
 {
     [Header("Prep Settings")]
     public ItemSO rawIngredient;
     public ItemSO preppedIngredient;
+    public TextMeshProUGUI mashCounterText;
+
     public int pressesRequired = 10;
     public float interactionRange = 2f;
 
@@ -23,12 +26,9 @@ public class PrepStation : MonoBehaviour
 
             if (distance <= interactionRange)
             {
-                // ✅ Player is in zone
                 if (!playerWasInZone)
                 {
-                    // ✨ Re-enter detected
                     Debug.Log("📦 Entered Prep Station: " + currentPlayer.name);
-
                     playerWasInZone = true;
 
                     if (currentInventory.HasItem(rawIngredient))
@@ -38,6 +38,7 @@ public class PrepStation : MonoBehaviour
                     else
                     {
                         Debug.Log("⚠️ No raw ingredients in inventory.");
+                        UpdateMashText(""); // Hide text if no ingredients
                     }
                 }
 
@@ -45,7 +46,6 @@ public class PrepStation : MonoBehaviour
             }
             else
             {
-                // ❌ Player left the zone
                 if (playerWasInZone)
                 {
                     Debug.Log("⬅️ Player walked away from prep station — resetting.");
@@ -65,24 +65,26 @@ public class PrepStation : MonoBehaviour
         {
             currentPresses++;
             Debug.Log("🔨 Mash Count: " + currentPresses + " / " + pressesRequired);
+            UpdateMashText($"Mash Count: {currentPresses} / {pressesRequired}");
 
             if (currentPresses >= pressesRequired)
             {
                 currentInventory.RemoveItem(rawIngredient, 1);
                 currentInventory.AddItem(preppedIngredient);
 
-                Debug.Log("✅ Finished prepping " + rawIngredient.name + " → added " + preppedIngredient.name);
+                Debug.Log($"✅ Finished prepping {rawIngredient.name} → added {preppedIngredient.name}");
 
                 currentPresses = 0;
                 isPrepping = false;
 
                 if (currentInventory.HasItem(rawIngredient))
                 {
-                    StartPrepping();
+                    StartPrepping(); // next item
                 }
                 else
                 {
                     Debug.Log("🍽️ No more ingredients.");
+                    UpdateMashText(""); // clear UI
                 }
             }
         }
@@ -94,9 +96,7 @@ public class PrepStation : MonoBehaviour
         {
             currentInventory = other.GetComponent<Inventory>();
             currentPlayer = other.transform;
-            playerWasInZone = false; // force re-entry detection
-
-            // Will log in Update when first distance check runs
+            playerWasInZone = false; // reset zone flag
         }
     }
 
@@ -105,6 +105,7 @@ public class PrepStation : MonoBehaviour
         currentPresses = 0;
         isPrepping = false;
         playerWasInZone = false;
+        UpdateMashText(""); // hide UI
     }
 
     void StartPrepping()
@@ -112,5 +113,14 @@ public class PrepStation : MonoBehaviour
         currentPresses = 0;
         isPrepping = true;
         Debug.Log("🍄 Started prepping " + rawIngredient.name);
+        UpdateMashText($"Mash Count: {currentPresses} / {pressesRequired}");
+    }
+
+    void UpdateMashText(string text)
+    {
+        if (mashCounterText != null)
+        {
+            mashCounterText.text = text;
+        }
     }
 }
