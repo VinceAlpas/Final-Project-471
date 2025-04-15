@@ -27,7 +27,6 @@ public class CustomerManager : MonoBehaviour
     {
         if (customerPrefabs.Count == 0)
         {
-            Debug.LogWarning("⚠️ CustomerManager: No customer prefabs assigned!");
             return;
         }
 

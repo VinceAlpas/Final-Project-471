@@ -19,33 +19,41 @@ public class ActionController : MonoBehaviour
         takeCooldown = new WaitForSeconds(0.5f);
     }
     private void Update()
+{
+    // Button A (joystick button 0) - equivalent to left mouse button
+    if (Input.GetKeyDown(KeyCode.JoystickButton0))
     {
-        if (Input.GetMouseButtonDown(0))
+        DoAction();
+    }
+    else if (Input.GetKey(KeyCode.JoystickButton0))
+    {
+        isWorking = true;
+        if (!isProcessing)
         {
-            DoAction();
+            StartProcessAction();
         }
-        else if (Input.GetMouseButton(0))
+        else
         {
-            isWorking = true;
-            if (isProcessing == false)
-            {
-                StartProcessAction();
-            }
-            else
-            {
-                DoProcessAction();
-            }
-        }
-        else if (Input.GetMouseButtonUp(0))
-        {
-            isWorking = false;
-            if (isProcessing)
-            {
-                currentFunction?.ResetTimer();
-                isProcessing = false;
-            }
+            DoProcessAction();
         }
     }
+    else if (Input.GetKeyUp(KeyCode.JoystickButton0))
+    {
+        isWorking = false;
+        if (isProcessing)
+        {
+            currentFunction?.ResetTimer();
+            isProcessing = false;
+        }
+    }
+
+    // Right Trigger for TakeAction (axis value > 0.5)
+    if (Input.GetAxis("Fire1") > 0.5f) // Or replace with custom axis
+    {
+        DoTakeAction();
+    }
+}
+
     private void DoAction()
     {
         anim.SetTrigger("Take");

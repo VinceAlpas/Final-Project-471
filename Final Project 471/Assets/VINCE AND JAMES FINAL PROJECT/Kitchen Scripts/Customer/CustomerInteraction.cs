@@ -45,7 +45,6 @@ public class CustomerInteraction : MonoBehaviour
     {
         if (other.GetComponent<Customer>() == nearbyCustomer)
         {
-            Debug.Log("👋 Left customer.");
             nearbyCustomer = null;
         }
     }
