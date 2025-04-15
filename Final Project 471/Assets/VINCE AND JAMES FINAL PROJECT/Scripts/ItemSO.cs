@@ -4,5 +4,5 @@ using UnityEngine;
 public class ItemSO : ScriptableObject
 {
     public string itemName;
-    public Sprite icon; // optional, for inventory UI
+    public Sprite icon;
 }
