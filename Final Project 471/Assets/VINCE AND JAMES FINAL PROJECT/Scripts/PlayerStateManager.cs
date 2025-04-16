@@ -83,7 +83,7 @@ public class PlayerStateManager : MonoBehaviour
     void OnMove(InputValue moveVal)
     {
         movement = moveVal.Get<Vector2>();
-        Debug.Log("🎮 MOVE input: " + movement);
+       // Debug.Log("🎮 MOVE input: " + movement);
 
         if (isAttacking) return;
 
