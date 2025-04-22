@@ -170,11 +170,11 @@ public class EnemyAI : MonoBehaviour
             Debug.LogWarning("itemDropPrefab not assigned");
         }
 
-        GameManager gm = FindObjectOfType<GameManager>();
-        if (gm != null)
-        {
-            gm.EnemyDefeated();
-        }
+        //GameManager gm = FindObjectOfType<GameManager>();
+        //if (gm != null)
+        //{
+        //    gm.EnemyDefeated();
+       // }
 
         Destroy(gameObject);
     }

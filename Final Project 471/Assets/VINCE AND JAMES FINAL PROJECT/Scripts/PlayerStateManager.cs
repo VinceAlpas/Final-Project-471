@@ -81,6 +81,7 @@ public Image cooldownImage;
 
         HandleMouseLook();
         HandleShooting();
+        CheckShootingInput();
 
         if (transform.position.y < fallThreshold)
             Die();
@@ -208,6 +209,17 @@ public Image cooldownImage;
         currentState.EnterState(this);
     }
 
+    void CheckShootingInput()
+{
+    if (Mouse.current.rightButton.wasReleasedThisFrame && canShoot)
+    {
+        // Start cooldown when mouse is released
+        canShoot = false;
+        cooldownTimer = shootCooldownTime;
+        UpdateCooldownUI(1f);
+    }
+}
+
     void HandleShooting()
 {
     if (Mouse.current.rightButton.isPressed && shootTimer <= shootTimeLimit && canShoot)
@@ -278,6 +290,5 @@ void UpdateCooldownUI(float value)
     void Die()
     {
         Debug.Log("Player has fallen off the platform!");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
