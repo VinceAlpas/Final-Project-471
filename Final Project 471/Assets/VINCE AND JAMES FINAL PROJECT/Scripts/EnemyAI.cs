@@ -144,7 +144,7 @@ void Start()
         Bullets bullet = other.GetComponent<Bullets>();
         if (bullet != null)
         {
-            TakeDamage(5);
+            TakeDamage(10);
             Destroy(other.gameObject);
             Debug.Log("Enemy hit by a bullet!");
             return;

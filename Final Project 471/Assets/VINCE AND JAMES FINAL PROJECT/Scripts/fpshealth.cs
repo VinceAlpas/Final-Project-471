@@ -25,6 +25,14 @@ public class fpshealth : MonoBehaviour
         }
     }
 
+    public void Heal(int amount)
+{
+    health += amount;
+    if (health > 100) health = 100; // Clamp to max health
+    UpdateHealthBar();
+    Debug.Log("Player healed! Health: " + health);
+}
+
     public void TakeDamage(int damage)
     {
         health -= damage;
