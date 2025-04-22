@@ -36,6 +36,8 @@ public Image cooldownImage;
     public float gravity = -20f;
     public float verticalVelocity;
     public bool isGrounded;
+    private bool isShootingWindowActive = false;
+
 
     private bool hasDoubleJumped = false;
     private float lastJumpTime = -100f;
@@ -53,6 +55,10 @@ public Image cooldownImage;
     private float shootTimeLimit = 3f; // Time limit to shoot bullets (5 seconds)
     private float shootTimer = 0f; // Timer to track shooting period
     private float cooldownTimer = 0f; // Timer for cooldown
+    private float fireRate = 0.2f; // seconds between bullets (e.g. 0.2 = 5 bullets per second)
+private float timeSinceLastShot = 0f;
+
+    
 
     public float fallThreshold = -10f;
     public int playerHealth = 100;
@@ -211,29 +217,46 @@ public Image cooldownImage;
 
     void CheckShootingInput()
 {
-    if (Mouse.current.rightButton.wasReleasedThisFrame && canShoot)
+    if (Mouse.current.rightButton.wasPressedThisFrame && canShoot)
     {
-        // Start cooldown when mouse is released
+        // Start shooting window
+        isShootingWindowActive = true;
+        shootTimer = 0f;
+        Invoke("EndShootingWindow", shootTimeLimit); // Automatically end after 3 seconds
+    }
+
+    if (Mouse.current.rightButton.wasReleasedThisFrame && isShootingWindowActive)
+    {
+        // Optional: stop early if player releases button
+        EndShootingWindow();
+    }
+}
+
+void EndShootingWindow()
+{
+    if (isShootingWindowActive)
+    {
+        isShootingWindowActive = false;
         canShoot = false;
         cooldownTimer = shootCooldownTime;
         UpdateCooldownUI(1f);
     }
 }
 
+
     void HandleShooting()
 {
-    if (Mouse.current.rightButton.isPressed && shootTimer <= shootTimeLimit && canShoot)
-    {
-        FireBullet();
-        shootTimer += Time.deltaTime;
-        UpdateCooldownUI(0f); // Fully usable
-    }
+    timeSinceLastShot += Time.deltaTime;
 
-    if (shootTimer >= shootTimeLimit && canShoot)
+    if (Mouse.current.rightButton.isPressed && isShootingWindowActive && canShoot)
     {
-        canShoot = false;
-        cooldownTimer = shootCooldownTime;
-        UpdateCooldownUI(1f); // Start cooldown UI
+        if (timeSinceLastShot >= fireRate)
+        {
+            FireBullet();
+            timeSinceLastShot = 0f; // Reset shot timer
+        }
+
+        UpdateCooldownUI(0f); // Fully usable
     }
 
     if (!canShoot)
@@ -245,11 +268,12 @@ public Image cooldownImage;
         if (cooldownTimer <= 0f)
         {
             canShoot = true;
-            shootTimer = 0f;
             UpdateCooldownUI(0f); // Reset UI
         }
     }
 }
+
+
 
 void UpdateCooldownUI(float value)
 {

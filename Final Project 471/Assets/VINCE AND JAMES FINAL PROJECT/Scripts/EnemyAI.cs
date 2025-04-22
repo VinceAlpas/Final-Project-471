@@ -23,6 +23,23 @@ public class EnemyAI : MonoBehaviour
     private float attackRange = 2.0f;
     private float attackCooldown = 2.0f;
     private float lastAttackTime = 0f;
+    public GameObject healthBarPrefab; // Assign the prefab
+private EnemyHealthBar healthBar;
+private int maxHealth;
+
+void Start()
+{
+    maxHealth = enemyHealth;
+
+    if (healthBarPrefab != null)
+    {
+        GameObject bar = Instantiate(healthBarPrefab, transform.position, Quaternion.identity);
+        healthBar = bar.GetComponent<EnemyHealthBar>();
+        healthBar.target = this.transform;
+    }
+}
+
+
 
     void Update()
     {
@@ -145,6 +162,12 @@ public class EnemyAI : MonoBehaviour
         enemyHealth -= damage;
         Debug.Log("Enemy took damage. Remaining health: " + enemyHealth);
 
+        if (healthBar != null)
+{
+    healthBar.UpdateHealthBar(enemyHealth, maxHealth);
+}
+
+
         if (enemyHealth <= 0)
         {
             Die();
@@ -169,6 +192,12 @@ public class EnemyAI : MonoBehaviour
         {
             Debug.LogWarning("itemDropPrefab not assigned");
         }
+
+        if (healthBar != null)
+{
+    Destroy(healthBar.gameObject);
+}
+
 
         //GameManager gm = FindObjectOfType<GameManager>();
         //if (gm != null)
