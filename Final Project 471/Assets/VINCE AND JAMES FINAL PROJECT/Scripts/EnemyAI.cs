@@ -127,7 +127,7 @@ public class EnemyAI : MonoBehaviour
         Bullets bullet = other.GetComponent<Bullets>();
         if (bullet != null)
         {
-            TakeDamage(10);
+            TakeDamage(5);
             Destroy(other.gameObject);
             Debug.Log("Enemy hit by a bullet!");
             return;

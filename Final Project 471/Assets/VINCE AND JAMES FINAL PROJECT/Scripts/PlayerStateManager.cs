@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerStateManager : MonoBehaviour
 {
@@ -14,6 +15,8 @@ public class PlayerStateManager : MonoBehaviour
     [HideInInspector] public PlayerDoubleJumpState doubleJumpState = new PlayerDoubleJumpState();
 
     [HideInInspector] public Vector2 movement;
+    [Header("UI Cooldown")]
+public Image cooldownImage;
     public Vector2 lookInput;
 
     public Transform playerCamera;
@@ -43,9 +46,13 @@ public class PlayerStateManager : MonoBehaviour
 
     public Transform bulletSpawner;
     public GameObject bulletPrefab;
-    private bool isFiring = false;
-    private float fireRate = 0.1f;
-    private float lastFireTime = 0f;
+    
+    // Shooting and cooldown variables
+    private bool canShoot = true; // To check if player can shoot
+    private float shootCooldownTime = 30f; // Cooldown duration (30 seconds)
+    private float shootTimeLimit = 3f; // Time limit to shoot bullets (5 seconds)
+    private float shootTimer = 0f; // Timer to track shooting period
+    private float cooldownTimer = 0f; // Timer for cooldown
 
     public float fallThreshold = -10f;
     public int playerHealth = 100;
@@ -64,7 +71,6 @@ public class PlayerStateManager : MonoBehaviour
 
     void Update()
     {
-
         isGrounded = controller.isGrounded;
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
@@ -203,13 +209,45 @@ public class PlayerStateManager : MonoBehaviour
     }
 
     void HandleShooting()
+{
+    if (Mouse.current.rightButton.isPressed && shootTimer <= shootTimeLimit && canShoot)
     {
-        if (Mouse.current.rightButton.isPressed && Time.time > lastFireTime + fireRate)
+        FireBullet();
+        shootTimer += Time.deltaTime;
+        UpdateCooldownUI(0f); // Fully usable
+    }
+
+    if (shootTimer >= shootTimeLimit && canShoot)
+    {
+        canShoot = false;
+        cooldownTimer = shootCooldownTime;
+        UpdateCooldownUI(1f); // Start cooldown UI
+    }
+
+    if (!canShoot)
+    {
+        cooldownTimer -= Time.deltaTime;
+        float ratio = Mathf.Clamp01(cooldownTimer / shootCooldownTime);
+        UpdateCooldownUI(ratio);
+
+        if (cooldownTimer <= 0f)
         {
-            FireBullet();
-            lastFireTime = Time.time;
+            canShoot = true;
+            shootTimer = 0f;
+            UpdateCooldownUI(0f); // Reset UI
         }
     }
+}
+
+void UpdateCooldownUI(float value)
+{
+    if (cooldownImage != null)
+    {
+        cooldownImage.fillAmount = value;
+    }
+}
+
+
 
     void FireBullet()
     {
@@ -226,7 +264,7 @@ public class PlayerStateManager : MonoBehaviour
             rb.linearVelocity = bulletSpawner.forward * 20f;
         }
 
-        Destroy(newBullet, 5f);
+        Destroy(newBullet, 5f); // Destroy bullet after 5 seconds
     }
 
     public void JumpPlayer()
@@ -240,5 +278,6 @@ public class PlayerStateManager : MonoBehaviour
     void Die()
     {
         Debug.Log("Player has fallen off the platform!");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

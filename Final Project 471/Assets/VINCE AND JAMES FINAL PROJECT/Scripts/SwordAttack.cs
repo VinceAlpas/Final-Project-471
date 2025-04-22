@@ -24,7 +24,7 @@ public class SwordAttack : MonoBehaviour
             EnemyAI enemy = other.GetComponent<EnemyAI>();
             if (enemy != null)
             {
-                enemy.TakeDamage(999); // Or however much you want to deal
+                enemy.TakeDamage(5); // Or however much you want to deal
             }
 
             // GameManager call should now happen from within EnemyAI.Die()
