@@ -21,7 +21,7 @@ public class CustomerInteraction : MonoBehaviour
             if (inventory.items.Count > 0)
             {
                 ItemSO itemToServe = inventory.items[0];
-                nearbyCustomer.TryServe(itemToServe);
+                nearbyCustomer.Deliver(itemToServe);  // ✅ Use Deliver instead of TryServe
                 inventory.RemoveItem(itemToServe, 1);
             }
             else
@@ -37,7 +37,7 @@ public class CustomerInteraction : MonoBehaviour
         if (customer != null)
         {
             nearbyCustomer = customer;
-            Debug.Log("👋 Near customer who wants: " + customer.GetOrderName());
+            Debug.Log("👋 Near customer who wants: " + customer.orderData.orderName);  // ✅ Access orderData directly
         }
     }
 

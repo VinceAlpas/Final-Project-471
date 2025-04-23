@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 public class PlayerInteraction : MonoBehaviour
 {
     private KitchenStation nearbyStation;
+    private Customer nearbyCustomer;
     private Inventory inventory;
 
     void Start()
@@ -13,11 +14,23 @@ public class PlayerInteraction : MonoBehaviour
 
     void Update()
     {
-        if (nearbyStation != null && !nearbyStation.IsBusy())
+        // Press A or fallback key
+        bool interactPressed = Gamepad.current != null 
+            ? Gamepad.current.buttonSouth.wasPressedThisFrame 
+            : Keyboard.current != null && Keyboard.current.eKey.wasPressedThisFrame;
+
+        if (interactPressed)
         {
-            if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame) // 'A' on controller
+            // 🧂 Handle kitchen interaction
+            if (nearbyStation != null)
             {
                 nearbyStation.TryProcessItem(inventory);
+            }
+
+            // 🧍‍♂️ Handle customer interaction
+            if (nearbyCustomer != null)
+            {
+                nearbyCustomer.Interact();
             }
         }
     }
@@ -28,6 +41,11 @@ public class PlayerInteraction : MonoBehaviour
         {
             nearbyStation = station;
         }
+
+        if (other.TryGetComponent(out Customer customer)) // ✅ FIXED
+        {
+            nearbyCustomer = customer;
+        }
     }
 
     private void OnTriggerExit(Collider other)
@@ -35,6 +53,11 @@ public class PlayerInteraction : MonoBehaviour
         if (other.TryGetComponent(out KitchenStation station) && station == nearbyStation)
         {
             nearbyStation = null;
+        }
+
+        if (other.TryGetComponent(out Customer customer) && customer == nearbyCustomer) // ✅ FIXED
+        {
+            nearbyCustomer = null;
         }
     }
 }

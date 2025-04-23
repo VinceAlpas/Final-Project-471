@@ -14,9 +14,13 @@ public class CustomerManager : MonoBehaviour
     [SerializeField] private List<Customer> customerPrefabs = new List<Customer>();
     [SerializeField] private Transform spawnPoint;
     [SerializeField] private Transform exitPoint;
+    [SerializeField] private List<Transform> tablePositions = new List<Transform>();
 
     private float currentTime = 0f;
-    private float lrRandom = 0.75f;
+    private float spawnCooldown = 0f;
+
+    private HashSet<int> occupiedTables = new HashSet<int>();
+    private Dictionary<Customer, int> customerTableMap = new Dictionary<Customer, int>();
 
     private void Awake()
     {
@@ -25,47 +29,69 @@ public class CustomerManager : MonoBehaviour
 
     private void Update()
     {
-        if (customerPrefabs.Count == 0)
-        {
+        if (customerPrefabs.Count == 0 || tablePositions.Count == 0)
             return;
-        }
 
-        if (currentTime <= Random.Range(50, 80)) // spawnRate is random between 50–80 seconds
+        if (occupiedTables.Count >= tablePositions.Count)
+            return; // all tables full
+
+        spawnCooldown += Time.deltaTime * timerSpeed;
+
+        if (spawnCooldown >= Random.Range(10f, 20f))
         {
-            currentTime += Time.deltaTime * timerSpeed;
-        }
-        else
-        {
-            currentTime = 0;
+            spawnCooldown = 0f;
 
-            Vector3 spawnPos = spawnPoint.position
-                + (spawnPoint.forward * -1 * customerList.Count)
-                + (spawnPoint.right * Random.Range(-lrRandom, lrRandom));
+            int tableIndex = GetAvailableTableIndex();
+            if (tableIndex == -1)
+            {
+                Debug.Log("🚫 No available tables.");
+                return;
+            }
 
+            Transform table = tablePositions[tableIndex];
             int randomIndex = Random.Range(0, customerPrefabs.Count);
-            Customer temp = Instantiate(customerPrefabs[randomIndex], spawnPos, spawnPoint.rotation);
-            customerList.Enqueue(temp);
+            Vector3 spawnPos = spawnPoint.position;
+
+            Customer newCustomer = Instantiate(customerPrefabs[randomIndex], spawnPos, Quaternion.identity);
+            newCustomer.SetTargetTable(table); // You must define this in Customer.cs
+            newCustomer.exitPoint = exitPoint; // Optional, if not already set via prefab
+
+            customerList.Enqueue(newCustomer);
+            occupiedTables.Add(tableIndex);
+            customerTableMap[newCustomer] = tableIndex;
         }
+    }
+
+    private int GetAvailableTableIndex()
+    {
+        for (int i = 0; i < tablePositions.Count; i++)
+        {
+            if (!occupiedTables.Contains(i))
+                return i;
+        }
+        return -1; // no tables available
+    }
+
+    public void CustomerFinished(Customer customer)
+    {
+        if (customerTableMap.TryGetValue(customer, out int tableIndex))
+        {
+            occupiedTables.Remove(tableIndex);
+            customerTableMap.Remove(customer);
+        }
+
+        if (customerList.Contains(customer))
+            customerList.Dequeue();
     }
 
     public void SellToCustomer()
     {
         if (customerList.Count == 0) return;
 
-        // Send first customer away
         Customer firstCustomer = customerList.Peek();
         firstCustomer.ExitFromArea(exitPoint.position);
         customerList.Dequeue();
 
-        // Move remaining customers up in line
-        Customer[] customers = customerList.ToArray();
-        for (int i = 0; i < customers.Length; i++)
-        {
-            Vector3 nextPos = spawnPoint.position
-                + (spawnPoint.forward * -1 * i)
-                + (spawnPoint.right * Random.Range(-lrRandom, lrRandom));
-
-            customers[i].MoveNext(nextPos);
-        }
+        CustomerFinished(firstCustomer);
     }
 }
