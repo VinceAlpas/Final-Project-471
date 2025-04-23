@@ -1237,11 +1237,25 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4169390738187188283, guid: 64beba13fdc64f244b324e1bd808635c, type: 3}
   m_PrefabInstance: {fileID: 6233903504958742561}
   m_PrefabAsset: {fileID: 0}
---- !u!224 &2082348098 stripped
+--- !u!224 &2082348098
 RectTransform:
+  m_ObjectHideFlags: 8
   m_CorrespondingSourceObject: {fileID: 5344798566954881679, guid: 5de39cedce88be2499d528f527b7da21, type: 3}
   m_PrefabInstance: {fileID: 5344416304380734275}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: -49.16}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2043590127}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 19.763, y: 44.322}
+  m_SizeDelta: {x: 1, y: 0.1}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!4 &2980062519293088003 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2624094974166851758, guid: e0e9edbc724c585499c271e5a4cce6e6, type: 3}
@@ -2046,6 +2060,10 @@ PrefabInstance:
       propertyPath: Target.TrackingTarget
       value: 
       objectReference: {fileID: 2980062519293088003}
+    - target: {fileID: 7116816130415090927, guid: 47940a8b6fdd57b4987ee56e498a0bf6, type: 3}
+      propertyPath: m_text
+      value: Press A to Collect
+      objectReference: {fileID: 0}
     - target: {fileID: 8089527818846801564, guid: 47940a8b6fdd57b4987ee56e498a0bf6, type: 3}
       propertyPath: m_Name
       value: Kitchen_Layout
