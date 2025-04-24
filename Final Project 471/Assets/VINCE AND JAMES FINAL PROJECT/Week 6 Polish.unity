@@ -1853,7 +1853,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7792327465708408392, guid: e0e9edbc724c585499c271e5a4cce6e6, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 9.16
+      value: 4.16
       objectReference: {fileID: 0}
     - target: {fileID: 7792327465708408392, guid: e0e9edbc724c585499c271e5a4cce6e6, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2011,18 +2011,6 @@ PrefabInstance:
       propertyPath: m_NavMeshData
       value: 
       objectReference: {fileID: 23800000, guid: c5235374dd2131d4aa14ffd3475f47c7, type: 2}
-    - target: {fileID: 5839585154611123698, guid: 47940a8b6fdd57b4987ee56e498a0bf6, type: 3}
-      propertyPath: CameraSide
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5839585154611123698, guid: 47940a8b6fdd57b4987ee56e498a0bf6, type: 3}
-      propertyPath: VerticalArmLength
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6024383696263378463, guid: 47940a8b6fdd57b4987ee56e498a0bf6, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 46.348625
-      objectReference: {fileID: 0}
     - target: {fileID: 6814246834574260412, guid: 47940a8b6fdd57b4987ee56e498a0bf6, type: 3}
       propertyPath: m_Name
       value: Customer
