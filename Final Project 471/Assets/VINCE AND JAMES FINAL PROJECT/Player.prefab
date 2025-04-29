@@ -334,7 +334,7 @@ MonoBehaviour:
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player1Controls
   m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 4928672618739685112}
 --- !u!143 &3879807286708969311
 CharacterController:
   m_ObjectHideFlags: 0
@@ -426,8 +426,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5724680249310465809}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.0145, y: 0.106439814, z: -0.05026117}
+  m_LocalRotation: {x: -0.49952415, y: -0.037775356, z: 0.021809611, w: -0.8652012}
+  m_LocalPosition: {x: 97.359146, y: 4.8001137, z: 3.5576298}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -466,7 +466,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 61.210857
+  field of view: 61.21086
   orthographic: 0
   orthographic size: 5
   m_Depth: -1
