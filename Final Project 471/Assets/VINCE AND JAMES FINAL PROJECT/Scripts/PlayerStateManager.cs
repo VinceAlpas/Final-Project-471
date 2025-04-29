@@ -314,5 +314,6 @@ void UpdateCooldownUI(float value)
     void Die()
     {
         Debug.Log("Player has fallen off the platform!");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
