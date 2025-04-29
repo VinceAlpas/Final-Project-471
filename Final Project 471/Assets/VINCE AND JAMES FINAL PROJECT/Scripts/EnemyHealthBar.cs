@@ -10,9 +10,21 @@ public class EnemyHealthBar : MonoBehaviour
     private Camera mainCam;
 
     void Start()
+{
+    float closestDistance = Mathf.Infinity;
+    foreach (Camera cam in Camera.allCameras)
     {
-        mainCam = Camera.main;
+        if (!cam.enabled) continue;
+
+        float dist = Vector3.Distance(transform.position, cam.transform.position);
+        if (dist < closestDistance)
+        {
+            mainCam = cam;
+            closestDistance = dist;
+        }
     }
+}
+
 
     void Update()
     {

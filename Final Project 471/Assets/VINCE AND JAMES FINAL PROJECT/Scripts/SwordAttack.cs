@@ -5,9 +5,13 @@ public class SwordAttack : MonoBehaviour
     public GameObject bloodEffectPrefab;
     private GameManager gameManager;
 
+    public int baseDamage = 10;
+    private int currentDamage;
+
     void Start()
     {
         gameManager = FindObjectOfType<GameManager>();
+        currentDamage = baseDamage; // Start with base damage
     }
 
     void OnTriggerEnter(Collider other)
@@ -24,11 +28,23 @@ public class SwordAttack : MonoBehaviour
             EnemyAI enemy = other.GetComponent<EnemyAI>();
             if (enemy != null)
             {
-                enemy.TakeDamage(10); // Or however much you want to deal
+                enemy.TakeDamage(currentDamage); // Use current damage
             }
-
-            // GameManager call should now happen from within EnemyAI.Die()
-            // So no need to call it here directly
         }
+    }
+
+    public void ActivatePowerBoost(int bonusDamage, float duration)
+    {
+        StopAllCoroutines(); // Stop any previous boost timers
+        StartCoroutine(PowerBoostCoroutine(bonusDamage, duration));
+    }
+
+    private System.Collections.IEnumerator PowerBoostCoroutine(int bonusDamage, float duration)
+    {
+        currentDamage = baseDamage + bonusDamage;
+        Debug.Log("Power boost active! Damage: " + currentDamage);
+        yield return new WaitForSeconds(duration);
+        currentDamage = baseDamage;
+        Debug.Log("Power boost ended. Damage reverted to: " + currentDamage);
     }
 }
