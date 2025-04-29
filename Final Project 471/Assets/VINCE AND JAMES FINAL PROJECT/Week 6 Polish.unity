@@ -1697,6 +1697,10 @@ PrefabInstance:
       propertyPath: field of view
       value: 61.210857
       objectReference: {fileID: 0}
+    - target: {fileID: 4928672618739685112, guid: a7ace2f619f53884b882d6fe15a14e07, type: 3}
+      propertyPath: m_TargetDisplay
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4962088882669136587, guid: a7ace2f619f53884b882d6fe15a14e07, type: 3}
       propertyPath: IsJumping
       value: 0
@@ -2039,7 +2043,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8836395724455842904, guid: a7ace2f619f53884b882d6fe15a14e07, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.106439814
+      value: 0.1064398
       objectReference: {fileID: 0}
     - target: {fileID: 8836395724455842904, guid: a7ace2f619f53884b882d6fe15a14e07, type: 3}
       propertyPath: m_LocalPosition.z
