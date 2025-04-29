@@ -8,6 +8,7 @@ TagManager:
   - friend
   - Enemy
   - Table
+  - Falldoor
   layers:
   - Default
   - TransparentFX
@@ -18,8 +19,8 @@ TagManager:
   - Walls
   - Cam A
   - Cam B
-  - 
-  - 
+  - NoCollision
+  - Falldoor
   - 
   - 
   - 
