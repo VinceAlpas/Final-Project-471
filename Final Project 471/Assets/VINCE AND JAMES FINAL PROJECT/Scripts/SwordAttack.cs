@@ -5,7 +5,7 @@ public class SwordAttack : MonoBehaviour
     public GameObject bloodEffectPrefab;
     private GameManager gameManager;
 
-    public int baseDamage = 10;
+    public int baseDamage = 15;
     private int currentDamage;
 
     void Start()
