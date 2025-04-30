@@ -12,16 +12,18 @@ public class Customer : MonoBehaviour
     public Transform targetTable;
     public Transform exitPoint;
     public GameObject exclamationIcon;
-    public TextMeshProUGUI orderText;  // <-- Shows the text instead of bubble
+    public TextMeshProUGUI orderText;      // Shows the customer's requested item
+    public TextMeshProUGUI feedbackText;   // Shows "Food Taken"
 
     [Header("Timers")]
-    public float waitTime = 60f;
+    public float waitTime = 900f;
     public float eatTime = 10f;
 
     private NavMeshAgent agent;
     private bool isOrderTaken = false;
     private bool isEating = false;
     private bool hasReachedTable = false;
+    private bool hasBeenCounted = false; // ✅ Prevent double win condition
     private float timer = 0f;
 
     void Start()
@@ -39,6 +41,7 @@ public class Customer : MonoBehaviour
 
         exclamationIcon?.SetActive(false);
         orderText?.gameObject.SetActive(false);
+        feedbackText?.gameObject.SetActive(false);
     }
 
     void Update()
@@ -79,6 +82,16 @@ public class Customer : MonoBehaviour
     {
         if (isOrderTaken && !isEating && item == orderData.requiredItem)
         {
+            // ✅ Hide order text so "Food Taken" is visible
+            if (orderText != null)
+                orderText.gameObject.SetActive(false);
+
+            // ✅ Show "Food Taken" if item is MushroomStew
+            if (item.itemName == "MushroomStew" && feedbackText != null)
+            {
+                StartCoroutine(ShowFeedbackMessage("Food Taken", 2f));
+            }
+
             StartCoroutine(ReceiveFoodAndLeave());
         }
         else
@@ -106,10 +119,19 @@ public class Customer : MonoBehaviour
 
     public void Leave()
     {
-        if (orderText != null)
-            orderText.gameObject.SetActive(false);
-
+        orderText?.gameObject.SetActive(false);
         exclamationIcon?.SetActive(false);
+
+        // ✅ Only trigger win logic once per customer
+        if (isEating && !hasBeenCounted)
+        {
+            GameManager gm = FindObjectOfType<GameManager>();
+            if (gm != null)
+            {
+                gm.CustomerServed();
+                hasBeenCounted = true;
+            }
+        }
 
         if (exitPoint != null)
         {
@@ -122,12 +144,23 @@ public class Customer : MonoBehaviour
             Debug.LogWarning("⚠️ No exit point set.");
             Destroy(gameObject);
         }
+
+        // ✅ Tell the manager the customer is done
+        CustomerManager.Instance?.CustomerFinished(this);
     }
 
     IEnumerator DestroyAfterExit()
     {
         yield return new WaitForSeconds(5f);
         Destroy(gameObject);
+    }
+
+    IEnumerator ShowFeedbackMessage(string message, float duration)
+    {
+        feedbackText.text = message;
+        feedbackText.gameObject.SetActive(true);
+        yield return new WaitForSeconds(duration);
+        feedbackText.gameObject.SetActive(false);
     }
 
     public void SetTargetTable(Transform table)

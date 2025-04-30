@@ -6,9 +6,6 @@ public class CustomerManager : MonoBehaviour
 {
     public static CustomerManager Instance;
 
-    [Header("Customer Timing")]
-    [SerializeField] private float timerSpeed = 1f;
-
     [Header("Customer Setup")]
     [SerializeField] private Queue<Customer> customerList = new Queue<Customer>();
     [SerializeField] private List<Customer> customerPrefabs = new List<Customer>();
@@ -16,8 +13,9 @@ public class CustomerManager : MonoBehaviour
     [SerializeField] private Transform exitPoint;
     [SerializeField] private List<Transform> tablePositions = new List<Transform>();
 
-    private float currentTime = 0f;
-    private float spawnCooldown = 0f;
+    [Header("Spawn Timing")]
+    [SerializeField] private float minSpawnDelay = 3f;
+    [SerializeField] private float maxSpawnDelay = 8f;
 
     private HashSet<int> occupiedTables = new HashSet<int>();
     private Dictionary<Customer, int> customerTableMap = new Dictionary<Customer, int>();
@@ -27,38 +25,12 @@ public class CustomerManager : MonoBehaviour
         Instance = this;
     }
 
-    private void Update()
+    private void Start()
     {
-        if (customerPrefabs.Count == 0 || tablePositions.Count == 0)
-            return;
-
-        if (occupiedTables.Count >= tablePositions.Count)
-            return; // all tables full
-
-        spawnCooldown += Time.deltaTime * timerSpeed;
-
-        if (spawnCooldown >= Random.Range(10f, 20f))
+        // ✅ Spawn customers to fill tables at game start
+        for (int i = 0; i < tablePositions.Count; i++)
         {
-            spawnCooldown = 0f;
-
-            int tableIndex = GetAvailableTableIndex();
-            if (tableIndex == -1)
-            {
-                Debug.Log("🚫 No available tables.");
-                return;
-            }
-
-            Transform table = tablePositions[tableIndex];
-            int randomIndex = Random.Range(0, customerPrefabs.Count);
-            Vector3 spawnPos = spawnPoint.position;
-
-            Customer newCustomer = Instantiate(customerPrefabs[randomIndex], spawnPos, Quaternion.identity);
-            newCustomer.SetTargetTable(table); // You must define this in Customer.cs
-            newCustomer.exitPoint = exitPoint; // Optional, if not already set via prefab
-
-            customerList.Enqueue(newCustomer);
-            occupiedTables.Add(tableIndex);
-            customerTableMap[newCustomer] = tableIndex;
+            StartCoroutine(SpawnCustomerWithDelay(Random.Range(minSpawnDelay, maxSpawnDelay)));
         }
     }
 
@@ -69,7 +41,37 @@ public class CustomerManager : MonoBehaviour
             if (!occupiedTables.Contains(i))
                 return i;
         }
-        return -1; // no tables available
+        return -1;
+    }
+
+    private void TrySpawnCustomer()
+    {
+        int tableIndex = GetAvailableTableIndex();
+        if (tableIndex == -1)
+        {
+            Debug.Log("🚫 No available tables.");
+            return;
+        }
+
+        Transform table = tablePositions[tableIndex];
+        int randomIndex = Random.Range(0, customerPrefabs.Count);
+        Vector3 spawnPos = spawnPoint.position;
+
+        Customer newCustomer = Instantiate(customerPrefabs[randomIndex], spawnPos, Quaternion.identity);
+        newCustomer.SetTargetTable(table);
+        newCustomer.exitPoint = exitPoint;
+
+        customerList.Enqueue(newCustomer);
+        occupiedTables.Add(tableIndex);
+        customerTableMap[newCustomer] = tableIndex;
+
+        Debug.Log("👤 Customer spawned at table " + tableIndex);
+    }
+
+    private IEnumerator SpawnCustomerWithDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        TrySpawnCustomer();
     }
 
     public void CustomerFinished(Customer customer)
@@ -82,6 +84,9 @@ public class CustomerManager : MonoBehaviour
 
         if (customerList.Contains(customer))
             customerList.Dequeue();
+
+        // ✅ Wait random delay before trying to spawn next
+        StartCoroutine(SpawnCustomerWithDelay(Random.Range(minSpawnDelay, maxSpawnDelay)));
     }
 
     public void SellToCustomer()
@@ -93,5 +98,15 @@ public class CustomerManager : MonoBehaviour
         customerList.Dequeue();
 
         CustomerFinished(firstCustomer);
+
+        GameManager gameManager = FindObjectOfType<GameManager>();
+        if (gameManager != null)
+        {
+            gameManager.CustomerServed();
+        }
+        else
+        {
+            Debug.LogWarning("GameManager not found when trying to increment chef's served count.");
+        }
     }
 }
